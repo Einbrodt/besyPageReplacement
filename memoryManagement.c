@@ -9,6 +9,7 @@ unsigned emptyFrameCounter = 0;		// number of empty Frames
 frameList_t emptyFrameList = NULL;
 frameListEntry_t *emptyFrameListTail = NULL;
 
+
 /* ------------------------------------------------------------------------ */
 /*		               Declarations of local helper functions				*/
 
@@ -183,6 +184,12 @@ int getEmptyFrameCount(void)
 		return -1;
 }
 
+void updateFrameCount(unsigned pid, int frameCount)
+{
+    processTable[pid].frameCount = frameCount;
+}
+
+
 
 /* ---------------------------------------------------------------- */
 /*                Implementation of local helper functions          */
@@ -284,10 +291,19 @@ Boolean updatePageEntry(unsigned pid, action_t action)
 /* Returns TRUE on success ans FALSE on any error							*/
 // *** This must be extended for advences page replacement algorithms ***
 {
-	processTable[pid].pageTable[action.page].referenced = TRUE; 
-	if (action.op == write)
-		processTable[pid].pageTable[action.page].modified = TRUE;
-	return TRUE; 
+    pageTableEntry_t *pageEntry = &processTable[pid].pageTable[action.page];
+
+    // set age according to reference and modification bit
+    pageEntry->age >>= 1;
+    pageEntry->age |= (pageEntry->referenced << (sizeof(unsigned) * 8 - 1));
+    if (action.op == write)
+        pageEntry->age |= (1 << (sizeof(unsigned) * 8 - 2));
+
+    // reset age related bits
+	pageEntry->referenced = FALSE;
+    pageEntry->modified = FALSE;
+
+    return TRUE;
 }
 
 
@@ -305,40 +321,38 @@ Boolean pageReplacement(unsigned *outPid, unsigned *outPage, int *outFrame)
 /* reference parameters.													*/
 /* Returns TRUE on success and FALSE on any error							*/
 {
-	Boolean found = FALSE;		// flag to indicate success
-	// just for readbility local copies ot the passed values are used:
-	unsigned pid = (*outPid); 
-	unsigned page = (*outPage);
-	int frame = *outFrame; 
-	
-	// +++++ START OF REPLACEMENT ALGORITHM IMPLEMENTATION: GLOBAL RANDOM ++++
-	logGeneric("MEM: Choosing a frame randomly, this must be improved");
-	frame = rand() % MEMORYSIZE;		// chose a frame by random
-	// As the initial implemetation does not have data structures that allows
-	// easy retrieval of the identity of a page residing in a given frame, 
-	// now the frame ist searched for in all page tables of all running processes
-	// I.e.: Iterate through the process table and for each valid PCB check 
-	//the valid entries in its page table until the frame is found
-	pid = 0; page = 0; 
-	do 
-	{
-		pid++;
-		if ((processTable[pid].valid) && (processTable[pid].pageTable != NULL))
-			for (page = 0; page < processTable[pid].size; page++)
-				if (processTable[pid].pageTable[page].frame == frame) {
-					found = TRUE;
-					break;
-				}
-	} while ((!found) && (pid < MAX_PROCESSES));
-	// +++++ END OF REPLACEMENT ALFGORITHM found indicates success/failure
-	// RESULT is pid, page, frame
+	Boolean found = FALSE;
+	unsigned pid, page;
+    int frame;
+    unsigned minAge = UINT_MAX; // iniitalise with maximum value
 
+    // iterate over all processes
+    for (pid = 1; pid <= MAX_PROCESSES; pid++)
+    {
+        if (processTable[pid].valid && processTable[pid].pageTable != NULL)
+        {
+            for (page = 0; page < processTable[pid].size; page++)
+            {
+                pageTableEntry_t *pageEntry = &processTable[pid].pageTable[page];
+
+                // find 'youngest' page
+                if (pageEntry->present && pageEntry->age < minAge)
+                {
+                    minAge = pageEntry->age;
+                    found = TRUE;
+                    frame = pageEntry->frame;
+                    
+                }
+            }
+        }
+    }
+	// RESULT is pid, page, frame
 	// prepare returning the resolved location for replacement
-	if (found)
+	if (found) 
 	{	// assign the current values to the call-by-reference parameters
 		(*outPid) = pid;
-		(*outPage) = page; 
+		(*outPage) = page;
 		(*outFrame) = frame;
 	}
-	return found; 
+    return found;
 }

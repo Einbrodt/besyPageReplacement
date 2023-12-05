@@ -27,6 +27,7 @@ void resetPCB (PCB_t *pcb)
 						// placeholder, but is not initialised
 	pcb->size = 0;		// process has no physical memory allocated
 	pcb->pageTable = NULL;
+	pcb->frameCount = 0;
 }
 
 /* ---------------------------------------------------------------- */

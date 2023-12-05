@@ -49,10 +49,11 @@ typedef struct pageTableEntry_struct
 	int frame;			// physical memory address, if present
 	int swapLocation;	// if page is not present, this indicates it's location in secondary memory
 						// as the content of the pages is not used in this simulation, it is unused
-
+	unsigned age;		// used for page replacement
 
 
 } pageTableEntry_t;
+
 
 /* data type for the Process Control Block */
 /* +++ this might need to be extended to support future features	+++ */
@@ -71,7 +72,9 @@ typedef struct PCB_struct
 	simInfo_t simInfo;
 	unsigned size;				// size of logical process memory in pages
 	pageTableEntry_t *pageTable;
+	unsigned frameCount;		// number of frames allocated to this process
 } PCB_t;
+
 
 /* data type for the possible actions wtr. memory usage by a process		*/
 /* This data type is used to trigger the respective action in the memory	*/
