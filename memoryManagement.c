@@ -184,11 +184,6 @@ int getEmptyFrameCount(void)
 		return -1;
 }
 
-void updateFrameCount(unsigned pid, int frameCount)
-{
-    processTable[pid].frameCount = frameCount;
-}
-
 
 
 /* ---------------------------------------------------------------- */
@@ -254,7 +249,10 @@ Boolean movePageIn(unsigned pid, unsigned page, unsigned frame)
 	processTable[pid].pageTable[page].referenced = TRUE;
 	// Statistics for advanced replacement algorithms need to be reset here also
 	// *** This must be extended for advences page replacement algorithms ***
-	// 
+	
+	// TODO: Extend this. 
+
+
 	// update the simulation accordingly !! DO NOT REMOVE !!
 	sim_UpdateMemoryMapping(pid, (action_t) { allocate, page }, frame);
 	return TRUE;
@@ -296,13 +294,8 @@ Boolean updatePageEntry(unsigned pid, action_t action)
     // set age according to reference and modification bit
     pageEntry->age >>= 1;
     pageEntry->age |= (pageEntry->referenced << (sizeof(unsigned) * 8 - 1));
-    if (action.op == write)
-        pageEntry->age |= (1 << (sizeof(unsigned) * 8 - 2));
-
     // reset age related bits
 	pageEntry->referenced = FALSE;
-    pageEntry->modified = FALSE;
-
     return TRUE;
 }
 
@@ -324,35 +317,29 @@ Boolean pageReplacement(unsigned *outPid, unsigned *outPage, int *outFrame)
 	Boolean found = FALSE;
 	unsigned pid, page;
     int frame;
-    unsigned minAge = UINT_MAX; // iniitalise with maximum value
+	unsigned minAge = UINT_MAX;
+
+	pid = (*outPid);
+	page = (*outPage);
+	frame = (*outFrame);
 
     // iterate over all processes
-    for (pid = 1; pid <= MAX_PROCESSES; pid++)
-    {
-        if (processTable[pid].valid && processTable[pid].pageTable != NULL)
+		if (processTable[pid].valid&& processTable[pid].pageTable != NULL)
         {
-            for (page = 0; page < processTable[pid].size; page++)
+            for (page = 0; page <= processTable[pid].size; page++)
             {
                 pageTableEntry_t *pageEntry = &processTable[pid].pageTable[page];
 
-                // find 'youngest' page
-                if (pageEntry->present && pageEntry->age < minAge)
+                // find 'oldest' page
+                if (pageEntry->referenced && pageEntry->age < minAge)
                 {
-                    minAge = pageEntry->age;
+					minAge = pageEntry->age;
                     found = TRUE;
                     frame = pageEntry->frame;
-                    
                 }
             }
         }
-    }
 	// RESULT is pid, page, frame
 	// prepare returning the resolved location for replacement
-	if (found) 
-	{	// assign the current values to the call-by-reference parameters
-		(*outPid) = pid;
-		(*outPage) = page;
-		(*outFrame) = frame;
-	}
     return found;
 }

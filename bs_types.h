@@ -50,8 +50,6 @@ typedef struct pageTableEntry_struct
 	int swapLocation;	// if page is not present, this indicates it's location in secondary memory
 						// as the content of the pages is not used in this simulation, it is unused
 	unsigned age;		// used for page replacement
-
-
 } pageTableEntry_t;
 
 
@@ -70,9 +68,8 @@ typedef struct PCB_struct
 	processType_t type;
 	status_t status;
 	simInfo_t simInfo;
-	unsigned size;				// size of logical process memory in pages
-	pageTableEntry_t *pageTable;
-	unsigned frameCount;		// number of frames allocated to this process
+	unsigned size;				 // size of logical process memory in pages
+	pageTableEntry_t *pageTable; 
 } PCB_t;
 
 
