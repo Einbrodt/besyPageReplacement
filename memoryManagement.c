@@ -210,10 +210,11 @@ Boolean storeEmptyFrame(int frame)
 		{
 			emptyFrameList = newEntry;
 		}
-		else								// appent do the list
+		else
+			// appent do the list
 			emptyFrameListTail->next = newEntry;
-		emptyFrameListTail = newEntry; 
-		emptyFrameCounter++;				// one more free frame
+			emptyFrameListTail = newEntry;
+			emptyFrameCounter++;				// one more free frame
 	}
 	return (newEntry != NULL); 
 }
@@ -229,7 +230,7 @@ int getEmptyFrame(void)
 	if (emptyFrameList == NULL) return NONE;	// no empty frame exists
 	emptyFrameNo = emptyFrameList->frame;	// get number of empty frame
 	// remove entry of that frame from the list
-	toBeDeleted = emptyFrameList;			
+	toBeDeleted = emptyFrameList;
 	emptyFrameList = emptyFrameList->next; 
 	free(toBeDeleted); 
 	emptyFrameCounter--;					// one empty frame less
@@ -251,7 +252,7 @@ Boolean movePageIn(unsigned pid, unsigned page, unsigned frame)
 	// *** This must be extended for advences page replacement algorithms ***
 	
 	// TODO: Extend this. 
-
+	updatePageEntry(pid, (action_t) { allocate, page });
 
 	// update the simulation accordingly !! DO NOT REMOVE !!
 	sim_UpdateMemoryMapping(pid, (action_t) { allocate, page }, frame);
@@ -273,7 +274,7 @@ Boolean movePageOut(unsigned pid, unsigned page, int frame)
 	// update the page table: mark absent, add frame to pool of empty frames
 	// *** This must be extended for advences page replacement algorithms ***
 	processTable[pid].pageTable[page].present = FALSE;
-
+	updatePageEntry(pid, (action_t) { read, page });
 	storeEmptyFrame(frame);	// add to pool of empty frames
 	// update the simulation accordingly !! DO NOT REMOVE !!
 	sim_UpdateMemoryMapping(pid, (action_t) { deallocate, page }, frame);
@@ -293,6 +294,8 @@ Boolean updatePageEntry(unsigned pid, action_t action)
 
     // set age according to reference and modification bit
     pageEntry->age >>= 1;
+	//pageEntry is way too big, which causes pagetable errors!
+	//TODO: Find a more suitable size, maybe 8 bytes max instead of 32.
     pageEntry->age |= (pageEntry->referenced << (sizeof(unsigned) * 8 - 1));
     // reset age related bits
 	pageEntry->referenced = FALSE;
@@ -319,27 +322,43 @@ Boolean pageReplacement(unsigned *outPid, unsigned *outPage, int *outFrame)
     int frame;
 	unsigned minAge = UINT_MAX;
 
-	pid = (*outPid);
-	page = (*outPage);
-	frame = (*outFrame);
-
     // iterate over all processes
-		if (processTable[pid].valid&& processTable[pid].pageTable != NULL)
-        {
-            for (page = 0; page <= processTable[pid].size; page++)
-            {
-                pageTableEntry_t *pageEntry = &processTable[pid].pageTable[page];
+	for (pid = 1; pid <= MAX_PROCESSES; pid++)
+	{
+		if (processTable[pid].valid && processTable[pid].pageTable != NULL)
+		{
+			for (page = 0; page <= processTable[pid].size; page++)
+			{
+				pageTableEntry_t* pageEntry = &processTable[pid].pageTable[page];
 
-                // find 'oldest' page
-                if (pageEntry->referenced && pageEntry->age < minAge)
-                {
+				// find 'oldest' page
+				if (pageEntry->referenced && pageEntry->age < minAge)
+				{
 					minAge = pageEntry->age;
-                    found = TRUE;
-                    frame = pageEntry->frame;
-                }
-            }
-        }
+					found = TRUE;
+					// Something odd going on here once the algorithm starts
+					// frame -1, which seems to output as 4295967295
+					// What is going on?
+					frame = pageEntry->frame;
+				}
+			}
+		}
+	}
+	if (found)
+	{
+		pid = (*outPid);
+		page = (*outPage);
+		frame = (*outFrame);
+	}
 	// RESULT is pid, page, frame
 	// prepare returning the resolved location for replacement
     return found;
 }
+
+//TODO: 
+// - find out why frame outputs as 429496295
+// - find more suitable size for updatePageEntry
+// - add output that respresents the aging table from the lectures
+// - maybe also track pagefaults as a counter? does that make sense?
+// - timereventhandler has to be adjusted
+// - hopefully, making it work! c: 
