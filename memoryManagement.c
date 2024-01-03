@@ -3,12 +3,13 @@
 //
 
 #include "memoryManagement.h"
+#include "processcontrol.h"
+#include <limits.h>
 
-Boolean memoryManagerInitialised = FALSE; 
+Boolean memoryManagerInitialised = FALSE;
 unsigned emptyFrameCounter = 0;		// number of empty Frames 
 frameList_t emptyFrameList = NULL;
-frameListEntry_t *emptyFrameListTail = NULL;
-
+frameListEntry_t* emptyFrameListTail = NULL;
 
 /* ------------------------------------------------------------------------ */
 /*		               Declarations of local helper functions				*/
@@ -30,8 +31,8 @@ int getEmptyFrame(void);
 Boolean movePageOut(unsigned pid, unsigned page, int frame);
 /* Creates an empty frame at the given location.							*/
 /* Copies the content of the frame occupid by the given page to secondary	*/
-/* storage.																	*/ 
-/* The exact location in seocondary storage is found and alocated by		*/ 
+/* storage.																	*/
+/* The exact location in seocondary storage is found and alocated by		*/
 /* this function.															*/
 /* The page table entries are updated to reflect that the page is no longer */
 /* present in RAM, including its location in seondary storage				*/
@@ -48,7 +49,7 @@ Boolean updatePageEntry(unsigned pid, action_t action);
 /* when accessing physical memory.											*/
 /* Returns TRUE on success and FALSE on any error							*/
 
-Boolean pageReplacement(unsigned *pid, unsigned *page, int *frame);
+Boolean pageReplacement(unsigned* pid, unsigned* page, int* frame);
 /* ===== The page replacement algorithm								======	*/
 /* In the initial implementation the frame to be cleared is chosen			*/
 /* globaly and randomly, i.e. a frame is chosen at random regardless of the	*/
@@ -90,7 +91,7 @@ Boolean shutdownMemoryManager(void)
 		free(toBeDeleted);
 		emptyFrameCounter--;		// one empty frame less
 	}
-	memoryManagerInitialised = FALSE ;		// memoryManager is no longer initialised
+	memoryManagerInitialised = FALSE;		// memoryManager is no longer initialised
 	return TRUE;
 #pragma warning(pop)
 }
@@ -103,7 +104,7 @@ int accessPage(unsigned pid, action_t action)
 {
 	int frame = INT_MAX;		// the frame the page resides in on return of the function
 	unsigned outPid = pid;
-	unsigned outPage= action.page;
+	unsigned outPage = action.page;
 	// check if page is present
 	if (isPagePresent(pid, action.page))
 	{// yes: page is present
@@ -120,7 +121,7 @@ int accessPage(unsigned pid, action_t action)
 			logPid(pid, "No empty frame found, running replacement algorithm");
 			pageReplacement(&outPid, &outPage, &frame);
 			// move candidate frame out to secondary storage
-			movePageOut(outPid, outPage, frame);			
+			movePageOut(outPid, outPage, frame);
 			frame = getEmptyFrame();
 		} // now we have an empty frame to move the page into
 		// move page in to empty frame
@@ -138,10 +139,10 @@ Boolean createPageTable(unsigned pid)
 #pragma warning( push )				// store current settings
 #pragma warning( disable : 6386 )	// disable buffer overflow warning, which is thrown without actual threat
 {
-	pageTableEntry_t *pTable = NULL;
+	pageTableEntry_t* pTable = NULL;
 	// create and initialise the page table of the process
 	pTable = malloc(processTable[pid].size * sizeof(pageTableEntry_t));
-	if (pTable == NULL) return FALSE; 
+	if (pTable == NULL) return FALSE;
 	// initialise the page table
 	for (unsigned i = 0; i < processTable[pid].size; i++)
 	{
@@ -149,7 +150,7 @@ Boolean createPageTable(unsigned pid)
 		pTable[i].frame = NONE;
 		pTable[i].swapLocation = NONE;
 	}
-	processTable[pid].pageTable = pTable; 
+	processTable[pid].pageTable = pTable;
 	return TRUE;
 #pragma warning( pop )				// restore unaltered settings
 }
@@ -159,7 +160,7 @@ Boolean deAllocateProcess(unsigned pid)
 /* returns TRUE on success, FALSE on error									*/
 {
 	// iterate the page table and mark all currently used frames as free
-	pageTableEntry_t *pTable = processTable[pid].pageTable;
+	pageTableEntry_t* pTable = processTable[pid].pageTable;
 	for (unsigned i = 0; i < processTable[pid].size; i++)
 	{
 		if (pTable[i].present == TRUE)
@@ -185,26 +186,25 @@ int getEmptyFrameCount(void)
 }
 
 
-
 /* ---------------------------------------------------------------- */
 /*                Implementation of local helper functions          */
 
 Boolean isPagePresent(unsigned pid, unsigned page)
 /* Predicate returning the present/absent status of the page in memory		*/
 {
-	return processTable[pid].pageTable[page].present; 
+	return processTable[pid].pageTable[page].present;
 }
 
 Boolean storeEmptyFrame(int frame)
 /* Store the frame number in the data structure of empty frames				*/
 /* and update emptyFrameCounter												*/
 {
-	frameListEntry_t *newEntry = NULL;
-	newEntry = malloc(sizeof(frameListEntry_t)); 
+	frameListEntry_t* newEntry = NULL;
+	newEntry = malloc(sizeof(frameListEntry_t));
 	if (newEntry != NULL)
 	{
 		// create new entry for the frame passed
-		newEntry->next = NULL;			
+		newEntry->next = NULL;
 		newEntry->frame = frame;
 		if (emptyFrameList == NULL)			// first entry in the list
 		{
@@ -213,10 +213,10 @@ Boolean storeEmptyFrame(int frame)
 		else
 			// appent do the list
 			emptyFrameListTail->next = newEntry;
-			emptyFrameListTail = newEntry;
-			emptyFrameCounter++;				// one more free frame
+		emptyFrameListTail = newEntry;
+		emptyFrameCounter++;				// one more free frame	
 	}
-	return (newEntry != NULL); 
+	return (newEntry != NULL);
 }
 
 int getEmptyFrame(void)
@@ -225,16 +225,16 @@ int getEmptyFrame(void)
 /* a page replacement algorithm must be called to evict a page and thus 	*/
 /* clear one frame															*/
 {
-	frameListEntry_t *toBeDeleted = NULL;
+	frameListEntry_t* toBeDeleted = NULL;
 	int emptyFrameNo = NONE;
 	if (emptyFrameList == NULL) return NONE;	// no empty frame exists
 	emptyFrameNo = emptyFrameList->frame;	// get number of empty frame
 	// remove entry of that frame from the list
 	toBeDeleted = emptyFrameList;
-	emptyFrameList = emptyFrameList->next; 
-	free(toBeDeleted); 
+	emptyFrameList = emptyFrameList->next;
+	free(toBeDeleted);
 	emptyFrameCounter--;					// one empty frame less
-	return emptyFrameNo; 
+	return emptyFrameNo;
 }
 
 Boolean movePageIn(unsigned pid, unsigned page, unsigned frame)
@@ -250,10 +250,9 @@ Boolean movePageIn(unsigned pid, unsigned page, unsigned frame)
 	processTable[pid].pageTable[page].referenced = TRUE;
 	// Statistics for advanced replacement algorithms need to be reset here also
 	// *** This must be extended for advences page replacement algorithms ***
-	
-	// TODO: Extend this. 
-	updatePageEntry(pid, (action_t) { allocate, page });
-
+	// 
+	// Update aging-specific logic: set the MSB in the age field
+	processTable[pid].pageTable[page].age |= 0x80;
 	// update the simulation accordingly !! DO NOT REMOVE !!
 	sim_UpdateMemoryMapping(pid, (action_t) { allocate, page }, frame);
 	return TRUE;
@@ -274,7 +273,10 @@ Boolean movePageOut(unsigned pid, unsigned page, int frame)
 	// update the page table: mark absent, add frame to pool of empty frames
 	// *** This must be extended for advences page replacement algorithms ***
 	processTable[pid].pageTable[page].present = FALSE;
-	updatePageEntry(pid, (action_t) { read, page });
+
+	// Update aging-specific logic: reset the age field
+	processTable[pid].pageTable[page].age = 0;
+
 	storeEmptyFrame(frame);	// add to pool of empty frames
 	// update the simulation accordingly !! DO NOT REMOVE !!
 	sim_UpdateMemoryMapping(pid, (action_t) { deallocate, page }, frame);
@@ -290,20 +292,19 @@ Boolean updatePageEntry(unsigned pid, action_t action)
 /* Returns TRUE on success ans FALSE on any error							*/
 // *** This must be extended for advences page replacement algorithms ***
 {
-    pageTableEntry_t *pageEntry = &processTable[pid].pageTable[action.page];
+	pageTableEntry_t* pageEntry = &processTable[pid].pageTable[action.page];
 
-    // set age according to reference and modification bit
-    pageEntry->age >>= 1;
-	//pageEntry is way too big, which causes pagetable errors!
-	//TODO: Find a more suitable size, maybe 8 bytes max instead of 32.
-    pageEntry->age |= (pageEntry->referenced << (sizeof(unsigned) * 8 - 1));
-    // reset age related bits
+	// set age according to reference and modification bit
+	pageEntry->age >>= 1;
+	pageEntry->age |= (pageEntry->referenced << 7); // Assuming 8-bit age field
+	// reset age related bits
 	pageEntry->referenced = FALSE;
-    return TRUE;
+
+	return TRUE;
 }
 
 
-Boolean pageReplacement(unsigned *outPid, unsigned *outPage, int *outFrame)
+Boolean pageReplacement(unsigned* outPid, unsigned* outPage, int* outFrame)
 /* ===== The page replacement algorithm								======	*/
 /* In the initial implementation the frame to be cleared is chosen			*/
 /* globaly and randomly, i.e. a frame is chosen at random regardless of the	*/
@@ -318,47 +319,47 @@ Boolean pageReplacement(unsigned *outPid, unsigned *outPage, int *outFrame)
 /* Returns TRUE on success and FALSE on any error							*/
 {
 	Boolean found = FALSE;
-	unsigned pid, page;
-    int frame;
+	unsigned minPid, minPage;
+	int minFrame = -1;
 	unsigned minAge = UINT_MAX;
 
-    // iterate over all processes
-	for (pid = 1; pid <= MAX_PROCESSES; pid++)
+	// iterate over all processes
+	for (unsigned pid = 1; pid <= MAX_PROCESSES; pid++)
 	{
 		if (processTable[pid].valid && processTable[pid].pageTable != NULL)
 		{
-			for (page = 0; page <= processTable[pid].size; page++)
+			for (unsigned page = 0; page < processTable[pid].size; page++)
 			{
 				pageTableEntry_t* pageEntry = &processTable[pid].pageTable[page];
 
 				// find 'oldest' page
-				if (pageEntry->referenced && pageEntry->age < minAge)
+				if (!pageEntry->referenced && pageEntry->age < minAge)
 				{
 					minAge = pageEntry->age;
+					minPid = pid;
+					minPage = page;
+					minFrame = pageEntry->frame;
 					found = TRUE;
-					// Something odd going on here once the algorithm starts
-					// frame -1, which seems to output as 4295967295
-					// What is going on?
-					frame = pageEntry->frame;
 				}
 			}
 		}
 	}
-	if (found)
-	{
-		pid = (*outPid);
-		page = (*outPage);
-		frame = (*outFrame);
-	}
-	// RESULT is pid, page, frame
-	// prepare returning the resolved location for replacement
-    return found;
+
+	// Update the output parameters
+	*outPid = minPid;
+	*outPage = minPage;
+	*outFrame = minFrame;
+
+	return found;
 }
 
 //TODO: 
-// - find out why frame outputs as 429496295
-// - find more suitable size for updatePageEntry
+// - find out why frame outputs as 429496295 
+//				-> SOLVED
+// - find more suitable size for updatePageEntry 
+//				-> SOLVED? a´ging wurde auf 8-Bitreduziert in table
 // - add output that respresents the aging table from the lectures
 // - maybe also track pagefaults as a counter? does that make sense?
 // - timereventhandler has to be adjusted
+//				-> ab Zeit über 100 bekommen wir ein Terminated(?)
 // - hopefully, making it work! c: 
