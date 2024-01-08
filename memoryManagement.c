@@ -1,3 +1,5 @@
+/* Tamara Boerner and Nichole Einbrodt							*/
+
 // memorymanagement.c : Implementation of the memory mananager 
 /* for comments on the global functions see the associated .h-file	*/
 //
@@ -74,6 +76,7 @@ Boolean initMemoryManager(void)
 	for (int i = 0; i < MEMORYSIZE; i++)
 		storeEmptyFrame(i);
 	memoryManagerInitialised = TRUE;		// flag successfull initialisation
+
 	return TRUE;
 }
 
@@ -250,9 +253,10 @@ Boolean movePageIn(unsigned pid, unsigned page, unsigned frame)
 	processTable[pid].pageTable[page].referenced = TRUE;
 	// Statistics for advanced replacement algorithms need to be reset here also
 	// *** This must be extended for advences page replacement algorithms ***
-	// 
-	// Update aging-specific logic: set the MSB in the age field
+	
+	// NEW: Update aging-specific logic: set the MSB in the age field
 	processTable[pid].pageTable[page].age |= 0x80;
+
 	// update the simulation accordingly !! DO NOT REMOVE !!
 	sim_UpdateMemoryMapping(pid, (action_t) { allocate, page }, frame);
 	return TRUE;
@@ -274,7 +278,7 @@ Boolean movePageOut(unsigned pid, unsigned page, int frame)
 	// *** This must be extended for advences page replacement algorithms ***
 	processTable[pid].pageTable[page].present = FALSE;
 
-	// Update aging-specific logic: reset the age field
+	// NEW: Update aging-specific logic: reset the age field
 	processTable[pid].pageTable[page].age = 0;
 
 	storeEmptyFrame(frame);	// add to pool of empty frames
@@ -294,10 +298,10 @@ Boolean updatePageEntry(unsigned pid, action_t action)
 {
 	pageTableEntry_t* pageEntry = &processTable[pid].pageTable[action.page];
 
-	// set age according to reference and modification bit
+	// NEW: set age according to reference and modification bit
 	pageEntry->age >>= 1;
-	pageEntry->age |= (pageEntry->referenced << 7); // Assuming 8-bit age field
-	// reset age related bits
+	pageEntry->age |= (pageEntry->referenced << 7); // NEW: Assuming 8-bit age field
+	// NEW: reset age related bits
 	pageEntry->referenced = FALSE;
 
 	return TRUE;
@@ -323,18 +327,20 @@ Boolean pageReplacement(unsigned* outPid, unsigned* outPage, int* outFrame)
 	int minFrame = -1;
 	unsigned minAge = UINT_MAX;
 
-	// iterate over all processes
+	// NEW: iterate over all processes
 	for (unsigned pid = 1; pid <= MAX_PROCESSES; pid++)
 	{
 		if (processTable[pid].valid && processTable[pid].pageTable != NULL)
 		{
+			// NEW: iterate over all pages
 			for (unsigned page = 0; page < processTable[pid].size; page++)
 			{
 				pageTableEntry_t* pageEntry = &processTable[pid].pageTable[page];
 
-				// find 'oldest' page
+				// NEW: find 'oldest' page
 				if (!pageEntry->referenced && pageEntry->age < minAge)
 				{
+					// NEW: update parameters
 					minAge = pageEntry->age;
 					minPid = pid;
 					minPage = page;
@@ -361,5 +367,5 @@ Boolean pageReplacement(unsigned* outPid, unsigned* outPage, int* outFrame)
 // - add output that respresents the aging table from the lectures
 // - maybe also track pagefaults as a counter? does that make sense?
 // - timereventhandler has to be adjusted
-//				-> ab Zeit über 100 bekommen wir ein Terminated(?)
+//				-> SOLVED
 // - hopefully, making it work! c: 

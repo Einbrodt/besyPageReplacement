@@ -1,3 +1,5 @@
+/* Tamara Boerner and Nichole Einbrodt							*/
+
 /* Implementation of the timer handler function								*/
 /* for comments on the global functions see the associated .h-file			*/
 #include "bs_types.h"
@@ -17,16 +19,18 @@ void timerEventHandler(void)
     // in absence of a data structure indexing the pages that are present, all 
     // running processes and all present pages must be checked. 
     // If the page is present, the R-bit is reset.
+    // 
+    // NEW: Iterate over all proccesses of the process
     for (unsigned pid = 1; pid <= MAX_PROCESSES; pid++)
     {
         if (processTable[pid].valid && processTable[pid].pageTable != NULL)
         {
-            // Iterate over all pages of the process
+            // NEW: Iterate over all pages of the process
             for (unsigned page = 0; page < processTable[pid].size; page++)
             {
                 pageTableEntry_t* pageEntry = &processTable[pid].pageTable[page];
 
-                // If the page is present, reset the referenced bit
+                // NEW: If the page is present, reset the referenced bit
                 if (pageEntry->present)
                 {
                     pageEntry->referenced = FALSE;
@@ -34,6 +38,5 @@ void timerEventHandler(void)
             }
         }
     }
-    // for a more sophisticated memory management systems with reasonable 
-    // page replacement, this timer event endler must be improved
+    
 }

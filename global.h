@@ -1,5 +1,7 @@
 /* Include-file defining global defines and constants  	 		*/
 /* used by the operating system */
+
+/* Changed Variables by Tamara Boerner and Michole Einbrodt */
 #ifndef __GLOBAL__
 #define __GLOBAL__
 
@@ -22,7 +24,7 @@
 // Size of the physical memory available to user processes in frames
 // This value shall be changed to a suitable number for more realistic testing. 
 // The system must run for an arbitrary (but reasonable) memory size
-#define MEMORYSIZE 4
+#define MEMORYSIZE 8		//physical Memory Size set to 8 [TB, NE]
 
 // Period of the timer. on all multiples of this value the timer ISR ist called by the simulation
 #define TIMER_INTERVAL 50			// *** This value must not be changed! ***

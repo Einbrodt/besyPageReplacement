@@ -1,3 +1,5 @@
+/* Tamara Boerner and Nichole Einbrodt							*/
+
 /* Include-file defining elementary data types used by the 			*/
 /* operating system */
 #ifndef __BS_TYPES__
@@ -49,7 +51,7 @@ typedef struct pageTableEntry_struct
 	int frame;			// physical memory address, if present
 	int swapLocation;	// if page is not present, this indicates it's location in secondary memory
 						// as the content of the pages is not used in this simulation, it is unused
-	unsigned age;		// used for page replacement
+	unsigned age;		// NEW: used for page replacement
 } pageTableEntry_t;
 
 
