@@ -304,6 +304,8 @@ Boolean updatePageEntry(unsigned pid, action_t action)
 	// NEW: reset age related bits
 	pageEntry->referenced = FALSE;
 
+
+
 	return TRUE;
 }
 
@@ -364,8 +366,11 @@ Boolean pageReplacement(unsigned* outPid, unsigned* outPage, int* outFrame)
 //				-> SOLVED
 // - find more suitable size for updatePageEntry 
 //				-> SOLVED? a´ging wurde auf 8-Bitreduziert in table
-// - add output that respresents the aging table from the lectures
+// - add output that respresents the aging table from the lectures		
+//				-> YES, need to do!
 // - maybe also track pagefaults as a counter? does that make sense?
+//				-> idk
 // - timereventhandler has to be adjusted
 //				-> SOLVED
 // - hopefully, making it work! c: 
+//				-> it does work :D we just need to make it pretty ;)
