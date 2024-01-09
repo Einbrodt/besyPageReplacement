@@ -73,8 +73,10 @@ Boolean pageReplacement(unsigned* pid, unsigned* page, int* frame);
 Boolean initMemoryManager(void)
 {
 	// mark all frames of the physical memory as empty 
-	for (int i = 0; i < MEMORYSIZE; i++)
+	for (int i = 0; i < MEMORYSIZE; i++) {
 		storeEmptyFrame(i);
+		rBits[i] = 0;
+	}
 	memoryManagerInitialised = TRUE;		// flag successfull initialisation
 
 	return TRUE;
@@ -132,6 +134,10 @@ int accessPage(unsigned pid, action_t action)
 	}
 	// update page table for replacement algorithm
 	updatePageEntry(pid, action);
+    if (processTable[pid].valid && processTable[pid].pageTable != NULL) {
+        pageTableEntry_t* pageEntry = &processTable[pid].pageTable[action.page];
+        pageEntry->referenced = TRUE;
+    }
 	return frame;
 }
 
@@ -365,7 +371,7 @@ Boolean pageReplacement(unsigned* outPid, unsigned* outPage, int* outFrame)
 // - find out why frame outputs as 429496295 
 //				-> SOLVED
 // - find more suitable size for updatePageEntry 
-//				-> SOLVED? a´ging wurde auf 8-Bitreduziert in table
+//				-> SOLVED? aï¿½ging wurde auf 8-Bitreduziert in table
 // - add output that respresents the aging table from the lectures		
 //				-> YES, need to do!
 // - maybe also track pagefaults as a counter? does that make sense?

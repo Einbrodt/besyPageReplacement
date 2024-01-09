@@ -41,6 +41,7 @@
 extern unsigned int	maxPID;				// largest valid PID
 extern PCB_t processTable[MAX_PROCESSES + 1]; 	// the process table
 extern unsigned systemTime; 			// the current system time (up time)
+int rBits[MEMORYSIZE];			// the reference bits for the clock algorithm]
 
 /* ----------------------------------------------------------------	*/
 /* Define global constants that will be visible in all sourcefiles	*/

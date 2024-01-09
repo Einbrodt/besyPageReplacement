@@ -9,7 +9,7 @@
 #include "log.h"
 
 
-extern sim_frame_t sim_memoryMap[MEMORYSIZE];	// Array storing the use of physical memory. For simulation use ONLY!
+extern sim_frame_t sim_memoryMap[MEMORYSIZE];    // Array storing the use of physical memory. For simulation use ONLY!
 
 
 /* ---------------------------------------------------------------- */
@@ -24,35 +24,52 @@ char eventString[3][12] = {"completed", "io", "quantumOver"};
 /*                Externally available functions					*/
 /* ---------------------------------------------------------------- */
 
-void logGeneric(char* message)
-{
-	printf("%6u : %s\n", systemTime, message); 
-}
-	
-void logPid(unsigned pid, char * message)
-{
-	printf("%6u : PID %3u : %s\n", systemTime, pid, message); 
-}
-		
-void logPidMemAccess(unsigned pid, action_t action)
-{
-	printf("%6u : PID %3u : ", systemTime, pid);
-	if (action.op == write) printf("Write");
-	if (action.op == read) printf(" Read");
-	printf("-Access to Page: %3u\n", action.page);
+void logGeneric(char *message) {
+    printf("%6u : %s\n", systemTime, message);
 }
 
-void logPidMemPhysical(unsigned pid, unsigned page, unsigned frame)
-{
-	printf("%6u : PID %3u : Resolving page %2u in frame %2u\n", 
-		systemTime, pid, page, frame);
+void logPid(unsigned pid, char *message) {
+    printf("%6u : PID %3u : %s\n", systemTime, pid, message);
+}
+
+void logPidMemAccess(unsigned pid, action_t action) {
+    printf("%6u : PID %3u : ", systemTime, pid);
+    if (action.op == write) printf("Write");
+    if (action.op == read) printf(" Read");
+    printf("-Access to Page: %3u\n", action.page);
+}
+
+void logPidMemPhysical(unsigned pid, unsigned page, unsigned frame) {
+    printf("%6u : PID %3u : Resolving page %2u in frame %2u\n",
+           systemTime, pid, page, frame);
 }
 
 void logMemoryMapping(void)
 /* prints out a memory map showing the use of all frames of the physical mem*/
 {
+    int intervals = systemTime / TIMER_INTERVAL;
+    for (int interval = 0; interval < intervals; interval++) {
+        printf("interval %d\n", interval);
+        printf("pages ");
+        for (int frame = 0; frame < MEMORYSIZE; ++frame) {
+            printf("%d | ", sim_memoryMap[frame].page);
+        }
+        printf("\n");
+        printf("r-bits ");
+        for (int frame = 0; frame < MEMORYSIZE; frame++) {
+            unsigned pid = sim_memoryMap[frame].pid;
+            unsigned page = sim_memoryMap[frame].page;
+            if (processTable[pid].valid && processTable[pid].pageTable != NULL) {
+                pageTableEntry_t *pageEntry = &processTable[pid].pageTable[page];
+                printf("%d | ", pageEntry->referenced);
+            }
+        }
+        printf("\n\n");
+    }
+}
+/*
 	int frame;
-	printf("%6u : Current allocation of physical memory: [PID, page] per frame\n",
+	printf("%6u : Current allocation of physical memory: [PID, page, r-bit] per frame\n",
 		systemTime);
 	printf("\t   00      01      02      03      04      05      06      07   \n");
 	for (int row = 0; row <= (MEMORYSIZE / 8); row++)   // loop for rows
@@ -65,12 +82,15 @@ void logMemoryMapping(void)
 			printf("[%2u,", sim_memoryMap[frame].pid);
 			if (sim_memoryMap[frame].pid == 0)
 				printf("--]\t");
-			else
-				printf("%2x]\t", sim_memoryMap[frame].page);
+			else {
+				printf("%2x, %d]\t", sim_memoryMap[frame].page, rBits[frame]);
+			}
 		}
 		printf("\n");
 	}
 }
+
+
 
 /* ----------------------------------------------------------------- */
 /*                       Local helper functions                      */
