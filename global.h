@@ -1,7 +1,7 @@
 /* Include-file defining global defines and constants  	 		*/
 /* used by the operating system */
 
-/* Changed Variables by Tamara Boerner and Michole Einbrodt */
+/* Changed Variables by Tamara Boerner and Nicole Einbrodt */
 #ifndef __GLOBAL__
 #define __GLOBAL__
 

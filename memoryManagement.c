@@ -1,4 +1,4 @@
-/* Tamara Boerner and Nichole Einbrodt							*/
+/* Tamara Boerner and Nicole Einbrodt							*/
 
 // memorymanagement.c : Implementation of the memory mananager 
 /* for comments on the global functions see the associated .h-file	*/

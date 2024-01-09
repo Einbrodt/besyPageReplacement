@@ -1,4 +1,4 @@
-/* Tamara Boerner and Nichole Einbrodt							*/
+/* Tamara Boerner and Nicole Einbrodt							*/
 
 /* Implementation of the timer handler function								*/
 /* for comments on the global functions see the associated .h-file			*/

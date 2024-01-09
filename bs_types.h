@@ -1,4 +1,4 @@
-/* Tamara Boerner and Nichole Einbrodt							*/
+/* Tamara Boerner and Nicole Einbrodt							*/
 
 /* Include-file defining elementary data types used by the 			*/
 /* operating system */

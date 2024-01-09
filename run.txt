@@ -1,4 +1,4 @@
-# Tamara Boerner and Nichole Einbrodt
+# Tamara Boerner and Nicole Einbrodt
 
 # 5 Prozesse mit physikalischem Speicher von 8 Rahmen
 # <time> <PID> <action> <action> ...          
