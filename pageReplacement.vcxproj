@@ -144,6 +144,9 @@
   <ItemGroup>
     <Text Include="processes.txt" />
     <Text Include="run.txt" />
+    <Text Include="run_2.txt" />
+    <Text Include="run_error.txt" />
+    <Text Include="run_many_intervals.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bs_types.h" />

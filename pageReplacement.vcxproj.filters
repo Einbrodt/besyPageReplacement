@@ -21,6 +21,15 @@
     <Text Include="processes.txt">
       <Filter>Ressourcendateien</Filter>
     </Text>
+    <Text Include="run_2.txt">
+      <Filter>Ressourcendateien</Filter>
+    </Text>
+    <Text Include="run_many_intervals.txt">
+      <Filter>Ressourcendateien</Filter>
+    </Text>
+    <Text Include="run_error.txt">
+      <Filter>Ressourcendateien</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bs_types.h">

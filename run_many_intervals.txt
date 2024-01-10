@@ -1,0 +1,46 @@
+# Tamara Boerner and Nicole Einbrodt
+
+# 5 Prozesse mit physikalischem Speicher von 8 Rahmen
+# <time> <PID> <action> <action> ...          
+# for each point in time a list of actions for the same process may be specified
+# possible entires for actions are: 
+#	S for start
+# 	E for end i.e. termination of the process, yielding in freeing all occupied frames
+#	Rx use of the page with the given number x for read-access
+#	Wx use of the page with the given number x for read-access
+#
+# Caution:	Each action in this file refers to the use of an entire page, not a single memory access
+#			For stimulus-creation keep in mind that the duration of processes must be long enough to 
+#			allow realistic use of the statistics of the page-access. The statistics are updated in the 
+#			background in the timer-interrupt callback handler, which is only triggered every TIMER_INTERVAL ticks. 
+# 
+# file must be ordered by ascending time stamps
+10 1 S 
+10 1 R0 
+15 1 W1
+20 2 S 
+20 2 R2 
+25 2 W3
+30 7 S
+30 7 R2
+50 3 S 
+50 3 R4
+80 3 W5
+80 1 E
+100 4 S 
+100 4 R6
+110 4 W7
+120 5 S 
+120 5 R0
+150 5 W1
+155 6 S
+155 7 W4
+200 6 R5
+210 2 E
+250 6 W3
+285 3 R3
+310 3 E
+345 4 E
+400 5 E				
+450 6 E
+500 7 E

@@ -50,12 +50,17 @@ void logMemoryMapping(void)
     int intervals = systemTime / TIMER_INTERVAL;
     for (int interval = 0; interval < intervals; interval++) {
         printf("interval %d\n", interval);
-        printf("pages ");
+        printf("pages \t");
         for (int frame = 0; frame < MEMORYSIZE; ++frame) {
-            printf("%d | ", sim_memoryMap[frame].page);
+            if (sim_memoryMap[frame].page == -1) {
+                printf("- | ");
+            }
+            else {
+                printf("%d | ", sim_memoryMap[frame].page);
+            }
         }
         printf("\n");
-        printf("r-bits ");
+        printf("r-bits \t");
         for (int frame = 0; frame < MEMORYSIZE; frame++) {
             unsigned pid = sim_memoryMap[frame].pid;
             unsigned page = sim_memoryMap[frame].page;
@@ -68,8 +73,9 @@ void logMemoryMapping(void)
     }
 }
 /*
+    
 	int frame;
-	printf("%6u : Current allocation of physical memory: [PID, page, r-bit] per frame\n",
+	printf("%6u : Current allocation of physical memory: [PID, page] per frame\n",
 		systemTime);
 	printf("\t   00      01      02      03      04      05      06      07   \n");
 	for (int row = 0; row <= (MEMORYSIZE / 8); row++)   // loop for rows
@@ -83,7 +89,7 @@ void logMemoryMapping(void)
 			if (sim_memoryMap[frame].pid == 0)
 				printf("--]\t");
 			else {
-				printf("%2x, %d]\t", sim_memoryMap[frame].page, rBits[frame]);
+				printf("%2x]\t", sim_memoryMap[frame].page);
 			}
 		}
 		printf("\n");
