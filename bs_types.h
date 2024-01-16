@@ -51,7 +51,7 @@ typedef struct pageTableEntry_struct
 	int frame;			// physical memory address, if present
 	int swapLocation;	// if page is not present, this indicates it's location in secondary memory
 						// as the content of the pages is not used in this simulation, it is unused
-	unsigned age;		// NEW: used for page replacement
+	unsigned reference_counter;		// NEW: used for page replacement
 } pageTableEntry_t;
 
 

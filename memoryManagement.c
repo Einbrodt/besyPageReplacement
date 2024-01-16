@@ -260,8 +260,8 @@ Boolean movePageIn(unsigned pid, unsigned page, unsigned frame)
 	// Statistics for advanced replacement algorithms need to be reset here also
 	// *** This must be extended for advences page replacement algorithms ***
 	
-	// NEW: Update aging-specific logic: set the MSB in the age field
-	processTable[pid].pageTable[page].age |= 0x80;
+	// NEW: Update aging-specific logic: set the MSB in the reference counter
+	processTable[pid].pageTable[page].reference_counter |= 0x80;
 
 	// update the simulation accordingly !! DO NOT REMOVE !!
 	sim_UpdateMemoryMapping(pid, (action_t) { allocate, page }, frame);
@@ -284,8 +284,8 @@ Boolean movePageOut(unsigned pid, unsigned page, int frame)
 	// *** This must be extended for advences page replacement algorithms ***
 	processTable[pid].pageTable[page].present = FALSE;
 
-	// NEW: Update aging-specific logic: reset the age field
-	processTable[pid].pageTable[page].age = 0;
+	// NEW: Update aging-specific logic: reset the referece counter field
+	processTable[pid].pageTable[page].reference_counter = 0;
 
 	storeEmptyFrame(frame);	// add to pool of empty frames
 	// update the simulation accordingly !! DO NOT REMOVE !!
@@ -305,8 +305,8 @@ Boolean updatePageEntry(unsigned pid, action_t action)
 	pageTableEntry_t* pageEntry = &processTable[pid].pageTable[action.page];
 
 	// NEW: set age according to reference and modification bit
-	pageEntry->age >>= 1;
-	pageEntry->age |= (pageEntry->referenced << 7); // NEW: Assuming 8-bit age field
+	pageEntry->reference_counter >>= 1;
+	pageEntry->reference_counter |= (pageEntry->referenced << 7); // NEW: Assuming 8-bit age field
 	// NEW: reset age related bits
 	pageEntry->referenced = FALSE;
 
@@ -346,10 +346,10 @@ Boolean pageReplacement(unsigned* outPid, unsigned* outPage, int* outFrame)
 				pageTableEntry_t* pageEntry = &processTable[pid].pageTable[page];
 
 				// NEW: find 'oldest' page
-				if (!pageEntry->referenced && pageEntry->age < minAge)
+				if (!pageEntry->referenced && pageEntry->reference_counter < minAge)
 				{
 					// NEW: update parameters
-					minAge = pageEntry->age;
+					minAge = pageEntry->reference_counter;
 					minPid = pid;
 					minPage = page;
 					minFrame = pageEntry->frame;

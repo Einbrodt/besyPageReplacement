@@ -48,28 +48,33 @@ void logMemoryMapping(void)
 /* prints out a memory map showing the use of all frames of the physical mem*/
 {
     int intervals = systemTime / TIMER_INTERVAL;
-    for (int interval = 0; interval < intervals; interval++) {
-        printf("interval %d\n", interval);
-        printf("pages \t");
-        for (int frame = 0; frame < MEMORYSIZE; ++frame) {
-            if (sim_memoryMap[frame].page == -1) {
-                printf("- | ");
+
+        for (int interval = 0; interval < intervals; interval++) {
+            printf("SystemTime %6u :\n",
+                systemTime);            
+            printf("Interval %d\n", interval);
+            printf("Pages \t");
+            for (int frame = 0; frame < MEMORYSIZE; ++frame) {
+                if (sim_memoryMap[frame].page == -1) {
+                    printf("- | ");
+                }
+                else {
+                    printf("%d | ", sim_memoryMap[frame].page);
+                }
             }
-            else {
-                printf("%d | ", sim_memoryMap[frame].page);
+            printf("\n");
+            printf("R-Bits \t");
+            for (int frame = 0; frame < MEMORYSIZE; frame++) {
+                unsigned pid = sim_memoryMap[frame].pid;
+                unsigned page = sim_memoryMap[frame].page;
+                if (processTable[pid].valid && processTable[pid].pageTable != NULL) {
+                    pageTableEntry_t* pageEntry = &processTable[pid].pageTable[page];
+                    printf("%d | ", pageEntry->referenced);
+                }
             }
-        }
-        printf("\n");
-        printf("r-bits \t");
-        for (int frame = 0; frame < MEMORYSIZE; frame++) {
-            unsigned pid = sim_memoryMap[frame].pid;
-            unsigned page = sim_memoryMap[frame].page;
-            if (processTable[pid].valid && processTable[pid].pageTable != NULL) {
-                pageTableEntry_t *pageEntry = &processTable[pid].pageTable[page];
-                printf("%d | ", pageEntry->referenced);
-            }
-        }
-        printf("\n\n");
+            printf("\n\n");
+
+        
     }
 }
 /*
