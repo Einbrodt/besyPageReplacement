@@ -75,7 +75,6 @@ Boolean initMemoryManager(void)
 	// mark all frames of the physical memory as empty 
 	for (int i = 0; i < MEMORYSIZE; i++) {
 		storeEmptyFrame(i);
-		rBits[i] = 0;
 	}
 	memoryManagerInitialised = TRUE;		// flag successfull initialisation
 

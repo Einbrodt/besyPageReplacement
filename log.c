@@ -46,60 +46,84 @@ void logPidMemPhysical(unsigned pid, unsigned page, unsigned frame) {
 
 void logMemoryMapping(void)
 /* prints out a memory map showing the use of all frames of the physical mem*/
+
 {
-    int intervals = systemTime / TIMER_INTERVAL;
+    int frame;
+    printf("%6u : Current allocation of physical memory: [PID, page, R-Bit] per frame\n",
+        systemTime);
+    printf("\t00          01          02          03          04          05          06          07    \n");
+    for (int row = 0; row <= (MEMORYSIZE / 8); row++)   // loop for rows
+    {
+        printf("%6u\t", row);
+        for (int column = 0; column < 8; column++)
+        {
+            frame = (row * 8 + column);
+            if (frame >= MEMORYSIZE) break;
+            printf("[%2u,", sim_memoryMap[frame].pid);
 
-        for (int interval = 0; interval < intervals; interval++) {
-            printf("SystemTime %6u :\n",
-                systemTime);            
-            printf("Interval %d\n", interval);
-            printf("Pages \t");
-            for (int frame = 0; frame < MEMORYSIZE; ++frame) {
-                if (sim_memoryMap[frame].page == -1) {
-                    printf("- | ");
-                }
-                else {
-                    printf("%d | ", sim_memoryMap[frame].page);
-                }
+            if (sim_memoryMap[frame].pid == 0)
+                printf(" -,");
+            else {
+                printf("%2x,", sim_memoryMap[frame].page);
             }
-            printf("\n");
-            printf("R-Bits \t");
-            for (int frame = 0; frame < MEMORYSIZE; frame++) {
-                unsigned pid = sim_memoryMap[frame].pid;
-                unsigned page = sim_memoryMap[frame].page;
-                if (processTable[pid].valid && processTable[pid].pageTable != NULL) {
-                    pageTableEntry_t* pageEntry = &processTable[pid].pageTable[page];
-                    printf("%d | ", pageEntry->referenced);
-                }
-            }
-            printf("\n\n");
+            printf(" %d]  ", getReferencedBit(frame));
 
-        
+        }
+        printf("\n");
     }
 }
-/*
     
-	int frame;
-	printf("%6u : Current allocation of physical memory: [PID, page] per frame\n",
-		systemTime);
-	printf("\t   00      01      02      03      04      05      06      07   \n");
-	for (int row = 0; row <= (MEMORYSIZE / 8); row++)   // loop for rows
-	{
-		printf("%6u\t", row);
-		for (int column = 0; column < 8; column++)
-		{
-			frame = (row * 8 + column);
-			if (frame >= MEMORYSIZE) break;
-			printf("[%2u,", sim_memoryMap[frame].pid);
-			if (sim_memoryMap[frame].pid == 0)
-				printf("--]\t");
-			else {
-				printf("%2x]\t", sim_memoryMap[frame].page);
-			}
-		}
-		printf("\n");
-	}
+    
+    
+    /*
+    int frame, intervals, pid;
+    intervals = systemTime / TIMER_INTERVAL;
+    pid = 0;
+    for (int row = 0; row <= (MEMORYSIZE / 8); row++)   // loop for rows
+    {
+        printf("%6u\t", row);
+        for (int column = 0; column < 8; column++)
+        {
+            printf("SystemTime %6u\n", systemTime);
+            /* for (int interval = 0; interval < intervals; interval++) {
+
+                printf("Interval \t%d\n", interval);
+            }
+            frame = (row * 8 + column);
+            if (frame >= MEMORYSIZE) break;
+            printf("PID: %d\n", sim_memoryMap[frame].pid);
+            printf("Page: ");
+            if (sim_memoryMap[frame].pid == 0)
+                printf("- | ");
+            else {
+                printf("%d | ", sim_memoryMap[frame].page);
+                printf("%d | ", getReferencedBit(frame));
+            }
+           
+            printf("\n\n");
+            
+
+        }
+    }
 }
+*/
+
+
+
+
+int getReferencedBit(int frame) {
+    unsigned pid = sim_memoryMap[frame].pid;
+    unsigned page = sim_memoryMap[frame].page;
+
+    if (processTable[pid].valid && processTable[pid].pageTable != NULL) {
+        pageTableEntry_t* pageEntry = &processTable[pid].pageTable[page];
+        return pageEntry->referenced;
+    }
+    return 0;
+}
+
+    
+	
 
 
 

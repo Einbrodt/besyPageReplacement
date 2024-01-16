@@ -30,6 +30,12 @@
     <Text Include="run_error.txt">
       <Filter>Ressourcendateien</Filter>
     </Text>
+    <Text Include="many_processes.txt">
+      <Filter>Ressourcendateien</Filter>
+    </Text>
+    <Text Include="run_many_processes.txt">
+      <Filter>Ressourcendateien</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bs_types.h">
