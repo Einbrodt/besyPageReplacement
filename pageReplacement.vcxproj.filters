@@ -27,13 +27,13 @@
     <Text Include="run_many_intervals.txt">
       <Filter>Ressourcendateien</Filter>
     </Text>
-    <Text Include="run_error.txt">
-      <Filter>Ressourcendateien</Filter>
-    </Text>
     <Text Include="many_processes.txt">
       <Filter>Ressourcendateien</Filter>
     </Text>
     <Text Include="run_many_processes.txt">
+      <Filter>Ressourcendateien</Filter>
+    </Text>
+    <Text Include="run_many_pages.txt">
       <Filter>Ressourcendateien</Filter>
     </Text>
   </ItemGroup>

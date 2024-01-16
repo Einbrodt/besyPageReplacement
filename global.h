@@ -31,9 +31,9 @@
 
 #define FILENAME_LENGTH 128
 // name of the file with process definitions
-#define PROCESS_FILENAME "processes.txt"
+#define PROCESS_FILENAME "many_processes.txt"
 // name of the file with the simulation run an empty file name switches to random event stimulus
-#define RUN_FILENAME "run_many_intervals.txt"
+#define RUN_FILENAME "run_many_pages.txt"
 //#define RUN_FILENAME ""
 
 /* ----------------------------------------------------------------	*/

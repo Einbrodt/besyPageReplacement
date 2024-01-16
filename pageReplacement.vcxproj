@@ -146,8 +146,8 @@
     <Text Include="processes.txt" />
     <Text Include="run.txt" />
     <Text Include="run_2.txt" />
-    <Text Include="run_error.txt" />
     <Text Include="run_many_intervals.txt" />
+    <Text Include="run_many_pages.txt" />
     <Text Include="run_many_processes.txt" />
   </ItemGroup>
   <ItemGroup>
